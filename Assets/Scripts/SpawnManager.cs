@@ -22,9 +22,10 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
     public Transform minX, maxX, minZ, maxZ;
 
-    private const byte SpawnEventCode = 1;
+    private const byte SpawnPlayerEventCode = 1;
+    private const byte SpawnPuckEventCode = 2;
 
-    
+
     private void Start()
     {
         PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
@@ -37,7 +38,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
 
     void OnEvent(EventData photonEvent)
     {
-        if (photonEvent.Code == SpawnEventCode)
+        if (photonEvent.Code == SpawnPlayerEventCode)
         {
             object[] data = (object[])photonEvent.CustomData;
 
@@ -46,6 +47,18 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             GameObject player = Instantiate(playerPrefab, receivedPosition + tableGameObject.transform.position, Quaternion.identity);
 
             player.GetComponent<PhotonView>().ViewID = (int)data[1];
+        }
+
+
+        if (photonEvent.Code == SpawnPuckEventCode)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+
+            Vector3 receivedPosition = (Vector3)data[0];
+
+            GameObject puck = Instantiate(puckPrefab, receivedPosition + tableGameObject.transform.position, Quaternion.identity);
+
+            puck.GetComponent<PhotonView>().ViewID = (int)data[1];
         }
     }
 
@@ -57,6 +70,8 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsConnectedAndReady)
         {
             SpawnPlayer();
+            if (PhotonNetwork.LocalPlayer.IsMasterClient)
+                SpawnPuck();
         }
     }
 
@@ -72,7 +87,7 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.PlayerListOthers.Length > 0)
             remotePlayerNumber = PhotonNetwork.PlayerListOthers[0].ActorNumber;
 
-        GameObject playerGameObject, puckGameObject;
+        GameObject playerGameObject;
         if (localPlayerNumber < remotePlayerNumber) // local joined first
         {
             statusText.text = "Local - " + localPlayerNumber + ", Remote - " + remotePlayerNumber;
@@ -84,7 +99,6 @@ public class SpawnManager : MonoBehaviourPunCallbacks
             playerGameObject = Instantiate(playerPrefab, spawnTransform1.position, Quaternion.identity);
         }
 
-        puckGameObject = Instantiate(puckPrefab, spawnTransformPuck.position, Quaternion.identity);
 
         MalletController malletController = playerGameObject.GetComponent<MalletController>();
         malletController.minX = minX;
@@ -92,14 +106,16 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         malletController.minZ = minZ;
         malletController.maxZ = maxZ;
 
-        PhotonView photonView = playerGameObject.GetComponent<PhotonView>();
+        PhotonView playerPhotonView = playerGameObject.GetComponent<PhotonView>();
 
-        if (PhotonNetwork.AllocateViewID(photonView))
+
+        if (PhotonNetwork.AllocateViewID(playerPhotonView))
         {
+
             object[] data = new object[]
             {
                 playerGameObject.transform.position - tableGameObject.transform.position,
-                photonView.ViewID
+                playerPhotonView.ViewID
             };
 
             // raise event to send this data to other players
@@ -115,11 +131,48 @@ public class SpawnManager : MonoBehaviourPunCallbacks
                 Reliability = true
             };
 
-            PhotonNetwork.RaiseEvent(SpawnEventCode, data, raiseEventOptions, sendOptions);
+            PhotonNetwork.RaiseEvent(SpawnPlayerEventCode, data, raiseEventOptions, sendOptions);
         }
         else
         {
             Destroy(playerGameObject);
+        }
+    }
+
+
+    private void SpawnPuck()
+    {
+        GameObject puckGameObject = Instantiate(puckPrefab, spawnTransformPuck.position, Quaternion.identity);
+
+        PhotonView puckPhotonView = puckGameObject.GetComponent<PhotonView>();
+
+        if (PhotonNetwork.AllocateViewID(puckPhotonView))
+        {
+
+            object[] data = new object[]
+            {
+                puckGameObject.transform.position - tableGameObject.transform.position,
+                puckPhotonView.ViewID
+            };
+
+            // raise event to send this data to other players
+            RaiseEventOptions raiseEventOptions = new RaiseEventOptions
+            {
+                Receivers = ReceiverGroup.Others,
+                CachingOption = EventCaching.AddToRoomCache
+            };
+
+
+            SendOptions sendOptions = new SendOptions
+            {
+                Reliability = true
+            };
+
+            PhotonNetwork.RaiseEvent(SpawnPuckEventCode, data, raiseEventOptions, sendOptions);
+        }
+        else
+        {
+            Destroy(puckGameObject);
         }
     }
 }

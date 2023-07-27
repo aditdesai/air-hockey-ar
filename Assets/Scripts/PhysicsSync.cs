@@ -12,7 +12,7 @@ public class PhysicsSync : MonoBehaviour, IPunObservable
 
     Transform tableTransform;
 
-    public float teleportIfDistanceGreaterThan = 1.5f;
+    public float teleportIfDistanceGreaterThan = 1.0f;
 
     private void Awake()
     {
