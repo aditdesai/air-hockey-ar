@@ -26,8 +26,8 @@ public class PuckController : MonoBehaviour
         if (collision.transform.CompareTag("Surface"))
         {
             rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezePositionY;
-            rb.constraints = RigidbodyConstraints.FreezeRotation;
+            rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+            // rb.constraints = ;
         }
     }
 }

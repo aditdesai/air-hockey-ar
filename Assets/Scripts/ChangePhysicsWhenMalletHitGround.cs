@@ -18,8 +18,8 @@ public class ChangePhysicsWhenMalletHitGround : MonoBehaviour
         {
             rb.useGravity = false;
             rb.isKinematic = true;
-            rb.constraints = RigidbodyConstraints.FreezePositionY;
-            rb.constraints = RigidbodyConstraints.FreezeRotation;
+            rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
+            // rb.constraints = ;
         }
     }
 }
