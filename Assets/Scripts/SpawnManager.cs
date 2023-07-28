@@ -91,12 +91,12 @@ public class SpawnManager : MonoBehaviourPunCallbacks
         if (localPlayerNumber < remotePlayerNumber) // local joined first
         {
             statusText.text = "Local - " + localPlayerNumber + ", Remote - " + remotePlayerNumber;
-            playerGameObject = Instantiate(playerPrefab, spawnTransform2.position, Quaternion.identity);
+            playerGameObject = Instantiate(playerPrefab, spawnTransform1.position, Quaternion.identity);
         }
         else
         {
             statusText.text = "Local - " + localPlayerNumber + ", Remote - " + remotePlayerNumber;
-            playerGameObject = Instantiate(playerPrefab, spawnTransform1.position, Quaternion.identity);
+            playerGameObject = Instantiate(playerPrefab, spawnTransform2.position, Quaternion.identity);
         }
 
 

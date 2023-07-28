@@ -1,4 +1,5 @@
 using UnityEngine;
+using Photon.Pun;
 
 public class PuckController : MonoBehaviour
 {
@@ -28,6 +29,11 @@ public class PuckController : MonoBehaviour
             rb.useGravity = false;
             rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
             // rb.constraints = ;
+        }
+
+        if (collision.transform.CompareTag("Player"))
+        {
+            GetComponent<PhotonView>().TransferOwnership(collision.gameObject.GetComponent<PhotonView>().Owner);
         }
     }
 }
